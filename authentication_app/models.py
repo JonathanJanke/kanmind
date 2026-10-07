@@ -1,10 +1,13 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-class User(models.Model):
+class User(AbstractUser):
+    username = None
     fullname = models.CharField(max_length=150)
-    email = models.EmailField()
-    password = models.CharField(max_length=128)
-    repeat_password = models.CharField(max_length=128, default='')
+    email = models.EmailField(unique=True)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["fullname"]
 
     def __str__(self):
         return self.fullname
