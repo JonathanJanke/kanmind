@@ -21,19 +21,16 @@ class UserRegistrationView(APIView):
 class UserLoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
-        email = request.data.get('email')
         password = request.data.get('password')
 
         if serializer.is_valid():
                 if User.objects.filter(email=serializer.validated_data['email']).exists():
-                    try:
-                        user = User.objects.get(email=email)
-                        if user.password == password:
-                            return Response(UserSerializer().get_response(user), status=status.HTTP_200_OK)
-                        else:
-                            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-                    except User.DoesNotExist:
-                        return Response({'error': 'Invalid credentials'}, status=status.HTTP_404_NOT_FOUND)
+                    
+                    user = User.objects.get(email=serializer.validated_data['email'])
+                    if user.password == password:
+                        return Response(serializer.get_response(user), status=status.HTTP_200_OK)
+                    else:
+                        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'error': 'Internal Server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'Serializer invalid', 'details': serializer.errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

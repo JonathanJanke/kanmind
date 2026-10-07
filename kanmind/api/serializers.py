@@ -22,3 +22,11 @@ class UserSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
+
+    def get_response(self, obj):
+        return {
+            "token": "dummy_token",  # Replace with actual
+            "fullname": obj.fullname,
+            "email": obj.email,
+            "user_id": obj.id
+        }
