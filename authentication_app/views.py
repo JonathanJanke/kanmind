@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authentication_app.models import User
-from kanmind.api.serializers import LoginSerializer, UserSerializer
+from core.api.serializers import LoginSerializer, UserSerializer
 
 
 class UserRegistrationView(APIView):

@@ -1,5 +1,5 @@
 """
-URL configuration for kanmind project.
+URL configuration for core project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.1/topics/http/urls/
@@ -19,5 +19,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('kanmind.api.urls')),
+    path('api/', include('core.api.urls')),
 ]
