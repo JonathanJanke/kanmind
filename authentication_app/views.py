@@ -4,12 +4,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import User
-from .serializers import LoginSerializer, UserSerializer
+from .serializers import LoginSerializer, UserRegisterSerializer
+from rest_framework.permissions import AllowAny
 
 
 class UserRegistrationView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserRegisterSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"error": "Invalid request data"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -34,6 +36,8 @@ class UserRegistrationView(APIView):
 
 
 class UserLoginView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():

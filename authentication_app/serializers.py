@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-class UserSerializer(serializers.Serializer):
+class UserRegisterSerializer(serializers.Serializer):
     fullname = serializers.CharField(max_length=150)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
