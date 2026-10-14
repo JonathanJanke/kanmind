@@ -16,3 +16,39 @@ class TaskListView(APIView):
             task = serializer.save()
             return Response(TaskSerializer.get_response(serializer, task), status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+class AssignedToUserView(APIView):
+    """
+    View to retrieve every task, this User is assigned to
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        View for retrieving every task, this User is assigned to
+        """
+        tasks = Task.objects.filter(assignee_id=request.user.id)
+        serializer = TaskSerializer()
+
+        data = [serializer.get_response(task) for task in tasks]
+        return Response(data, status=status.HTTP_200_OK)
+
+class ReviewingToUserView(APIView):
+    """
+    View to retrieve every task, this User is assigned to
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        View for retrieving every task, this User is assigned to
+        """
+        tasks = Task.objects.filter(reviewer_id=request.user.id)
+        serializer = TaskSerializer()
+
+        data = [serializer.get_response(task) for task in tasks]
+        return Response(data, status=status.HTTP_200_OK)
+    

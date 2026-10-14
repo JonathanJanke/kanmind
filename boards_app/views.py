@@ -115,3 +115,4 @@ class BoardDetailView(APIView):
 
         board.delete()
         return Response({"success": "Board deleted"}, status=204)
+

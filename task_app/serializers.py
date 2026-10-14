@@ -19,6 +19,9 @@ class TaskSerializer(serializers.ModelSerializer):
         board = data.get("board")
         if board and not (board.owner_id == user.id or user in board.members.all()):
             raise serializers.ValidationError("You do not have permission to create a task for this board.")
+        if board and not (board.owner_id == assignee or reviewer or assignee or reviewer in board.members.all()):
+            raise serializers.ValidationError("That´s not a boardmember")
+        
         if data.get("status") not in ["to-do", "in-progress", "review", "done"]:
             raise serializers.ValidationError("Invalid status value.")
         if data.get("priority") not in ["low", "medium", "high"]:
