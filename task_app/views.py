@@ -11,9 +11,8 @@ class TaskListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = TaskSerializer(data=request.data)
+        serializer = TaskSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             task = serializer.save()
-            return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
+            return Response(TaskSerializer.get_response(serializer, task), status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# Create your views here.

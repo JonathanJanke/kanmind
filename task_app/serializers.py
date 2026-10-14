@@ -1,4 +1,4 @@
-from django.tasks import Task
+from .models import Task
 from authentication_app.models import User
 
 from rest_framework import serializers
@@ -13,15 +13,12 @@ class TaskSerializer(serializers.ModelSerializer):
 
         assignee = User.objects.filter(pk=data.get("assignee_id")).first()
         reviewer = User.objects.filter(pk=data.get("reviewer_id")).first()
-        request = self.context["request"]
+        request = self.context.get("request")
         user = request.user
 
-        if data.get("board") and data["board"].member != user.id:
+        board = data.get("board")
+        if board and not (board.owner_id == user.id or user in board.members.all()):
             raise serializers.ValidationError("You do not have permission to create a task for this board.")
-        if data.get("board") and data["board"].member != assignee.id:
-            raise serializers.ValidationError("Assignee aint a boardmember.")
-        if data.get("board") and data["board"].member != reviewer.id:
-            raise serializers.ValidationError("Reviewer aint a boardmember.")
         if data.get("status") not in ["to-do", "in-progress", "review", "done"]:
             raise serializers.ValidationError("Invalid status value.")
         if data.get("priority") not in ["low", "medium", "high"]:
