@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from boards_app.models import Board
 
@@ -11,3 +12,9 @@ class Task(models.Model):
     assignee_id = models.IntegerField(null=True, blank=True)
     reviewer_id = models.IntegerField(null=True, blank=True)
     due_date = models.DateField(null=True)
+
+class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

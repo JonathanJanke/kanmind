@@ -1,7 +1,35 @@
-from .models import Task
+from django.http import request
+
+from .models import Comment, Task
 from authentication_app.models import User
 
 from rest_framework import serializers
+
+def validate_board_user(self, data):
+    
+    board = data.get("board")
+    if board is None and self.instance is not None:
+        board = self.instance.board
+
+    assignee_id = data.get("assignee_id")
+
+    if assignee_id is not None:
+        try:
+            assignee = User.objects.get(pk=assignee_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({
+                "assignee_id": "No assignee with that ID found."
+            })
+
+    if board and (
+        board.owner_id != assignee.id
+        and not board.members.filter(pk=assignee.id).exists()
+    ):
+        raise serializers.ValidationError({
+            "assignee_id": "Assignee is not a boardmember."
+        })
+    
+    return data
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -10,23 +38,7 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
-
-        assignee = User.objects.filter(pk=data.get("assignee_id")).first()
-        reviewer = User.objects.filter(pk=data.get("reviewer_id")).first()
-        request = self.context.get("request")
-        user = request.user
-
-        board = data.get("board")
-        if board and not (board.owner_id == user.id or user in board.members.all()):
-            raise serializers.ValidationError("You do not have permission to create a task for this board.")
-        if board and not (board.owner_id == assignee or reviewer or assignee or reviewer in board.members.all()):
-            raise serializers.ValidationError("That´s not a boardmember")
-        
-        if data.get("status") not in ["to-do", "in-progress", "review", "done"]:
-            raise serializers.ValidationError("Invalid status value.")
-        if data.get("priority") not in ["low", "medium", "high"]:
-            raise serializers.ValidationError("Invalid priority value.")
-
+        validate_board_user(self, data)
         return data
         
     def get_response(self, obj):
@@ -45,4 +57,50 @@ class TaskSerializer(serializers.ModelSerializer):
             "reviewer": {"id": reviewer.id, "email": reviewer.email, "fullname": reviewer.fullname} if reviewer else None,
             "due_date": obj.due_date,
             # "comments_count": obj.comments.count(),
+        }
+
+class SingleTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = "__all__"
+
+    def validate(self, data): 
+        validate_board_user(self, data)
+        return data
+
+    def get_response(self, obj):
+            
+        assignee = User.objects.filter(pk=obj.assignee_id).first()
+        reviewer = User.objects.filter(pk=obj.reviewer_id).first()
+        return {
+            "id": obj.id,
+            "board": obj.board.id,
+            "title": obj.title,
+            "description": obj.description,
+            "status": obj.status,
+            "priority": obj.priority,
+            "assignee": {"id": assignee.id, "email": assignee.email, "fullname": assignee.fullname} if assignee else None,
+            "reviewer": {"id": reviewer.id, "email": reviewer.email, "fullname": reviewer.fullname} if reviewer else None,
+            "due_date": obj.due_date,
+            # "comments_count": obj.comments.count(),
+        }
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["content"]
+
+    def validate(self, data):
+        if not data.get("content"):
+            raise serializers.ValidationError({
+                "content": "Content is required."
+            })
+        return data
+
+    def get_response(self, obj):
+        return {
+            "id": obj.id,
+            "created_at": obj.created_at,
+            "author": obj.author.fullname,
+            "content": obj.content,
         }
