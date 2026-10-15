@@ -56,27 +56,39 @@ class BoardSerializer(serializers.ModelSerializer):
         return {
             "id": self.instance.id,
             "title": self.instance.title,
+            "member_count": self.instance.members.count(),
+            "ticket_count": self.instance.tasks.count(),
+            "tasks_to_do_count": self.instance.tasks_to_do_count,
+            "tasks_high_prio_count": self.instance.tasks_high_prio_count,
             "owner_id": self.instance.owner_id,
-            "members": [
-                user_data(member)
-                for member in self.instance.members.all()
-            ],
-            "tasks": [
-                {
-                    "id": task.id,
-                    "title": task.title,
-                    "description": task.description,
-                    "status": task.status,
-                    "priority": task.priority,
-                    "assignees": [
-                        user_data(user) for user in task.assignees.all()
-                    ],
-                    "reviewers": [
-                        user_data(user) for user in task.reviewers.all()
-                    ],
-                    "due_date": task.due_date,
-                    "comments_count": task.comments.count(),
-                }
-                for task in tasks
-            ],
         }
+
+    def get_detail_response(self):
+            def user_data(user):
+                return {
+                    "id": user.id,
+                    "email": user.email,
+                    "fullname": user.fullname,
+                }
+    
+            tasks = self.instance.tasks.prefetch_related("assignees", "reviewers")
+    
+            return {
+                "id": self.instance.id,
+                "title": self.instance.title,
+                "owner_id": self.instance.owner_id,
+                "members": [user_data(member) for member in self.instance.members.all()],
+                "tasks": [
+                    {
+                        "id": task.id,
+                        "title": task.title,
+                        "status": task.status,
+                        "priority": task.priority,
+                        "assignees": [user_data(assignee) for assignee in task.assignees.all()],
+                        "reviewers": [user_data(reviewer) for reviewer in task.reviewers.all()],
+                        "due_date": task.due_date,
+                        "comments_count": task.comments.count()
+                    }
+                    for task in tasks
+                ],
+            }

@@ -67,7 +67,8 @@ class BoardListView(APIView):
         serializer.is_valid(raise_exception=True)
         board = serializer.save(owner_id=request.user.id)
         board = boards_with_counts().get(pk=board.pk)
-        return Response(BoardSerializer(board).data, status=201)
+        return Response(BoardSerializer.get_response(BoardSerializer(board)), status=201)
+    
 
     def get(self, request):
         """Listet die Boards, bei denen der Benutzer Owner oder Mitglied ist."""
@@ -95,7 +96,7 @@ class BoardDetailView(APIView):
         if not (board.owner_id == request.user.id or request.user in board.members.all()):
             return Response({"error": "You do not have permission to view this board"}, status=403)
 
-        return Response(BoardSerializer.get_response(BoardSerializer(board)))
+        return Response(BoardSerializer.get_detail_response(BoardSerializer(board)))
 
     def patch(self, request, board_id):
         """Aktualisiert ein Board teilweise; Änderungen sind nur dem Owner erlaubt."""

@@ -28,7 +28,7 @@ class AssignedToUserView(APIView):
 
     def get(self, request):
         """Gibt alle Tasks zurück, die dem angemeldeten Benutzer zugewiesen sind."""
-        tasks = Task.objects.filter(assignee_id=request.user.id)
+        tasks = Task.objects.filter(assignees=request.user).distinct()
         serializer = TaskSerializer()
 
         data = [serializer.get_response(task) for task in tasks]
@@ -43,7 +43,7 @@ class ReviewingToUserView(APIView):
 
     def get(self, request):
         """Gibt alle Tasks zurück, bei denen der Benutzer als Reviewer eingetragen ist."""
-        tasks = Task.objects.filter(reviewer_id=request.user.id)
+        tasks = Task.objects.filter(reviewers=request.user).distinct()
         serializer = TaskSerializer()
 
         data = [serializer.get_response(task) for task in tasks]
@@ -66,13 +66,13 @@ class SingleTaskView(APIView):
             return Response(SingleTaskSerializer.get_response(serializer, updated_task), status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, task_id):
+    def delete(self,request, task_id):
         """Löscht den angegebenen Task oder antwortet mit 404, falls er nicht existiert."""
         try:
             task = Task.objects.get(pk=task_id)
         except Task.DoesNotExist:
             return Response({"error": "Wrong task id."}, status=status.HTTP_404_NOT_FOUND)
-
+        
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -87,7 +87,7 @@ class CommentListView(APIView):
 
     def post(self, request, task_id):
         """Erstellt einen Kommentar für den Task und setzt den Autor auf den angemeldeten Benutzer."""
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentSerializer(data=request.data, context={"task_id": task_id})
         if serializer.is_valid():
             serializer.save(task_id=task_id, author=request.user)
             return Response(CommentSerializer.get_response(serializer, serializer.instance), status=status.HTTP_201_CREATED)

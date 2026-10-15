@@ -5,11 +5,11 @@ class UserRegisterSerializer(serializers.Serializer):
     fullname = serializers.CharField(max_length=150)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
-    repeat_password = serializers.CharField(write_only=True, required=True)
+    repeated_password = serializers.CharField(write_only=True, required=True)
 
     def validate(self, data):
         """Prüft, ob Passwort und Passwortbestätigung identisch sind."""
-        if data["password"] != data["repeat_password"]:
+        if data["password"] != data["repeated_password"]:
             raise serializers.ValidationError("Invalid request data.")
         return data
 

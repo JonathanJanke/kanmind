@@ -18,7 +18,7 @@ class UserRegistrationView(APIView):
             return Response({"error": "Invalid request data"}, status=status.HTTP_400_BAD_REQUEST)
 
         user_data = serializer.validated_data.copy()
-        user_data.pop("repeat_password")
+        user_data.pop("repeated_password")
         raw_password = user_data.pop("password")
 
         if User.objects.filter(email=user_data["email"]).exists():
