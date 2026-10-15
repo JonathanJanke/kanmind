@@ -1,24 +1,24 @@
 # Kanmind
 
-Kanmind ist eine Django-REST-API für Boards, Tasks und Benutzer. Die Datenbank ist standardmäßig SQLite.
+Kanmind is a Django REST API for boards, tasks, and users. The database is SQLite by default.
 
-## Voraussetzungen
+## Requirements
 
-- Python 3.13 wird für die in `requirements.txt` festgelegten Abhängigkeiten empfohlen.
+- Python 3.13 is recommended for the dependencies specified in `requirements.txt`.
 - Git
 
-## Projekt herunterladen
+## Clone the project
 
 ```bash
 git clone <REPOSITORY-URL>
 cd kanmind
 ```
 
-Ersetze `<REPOSITORY-URL>` durch die Clone-URL des Projekts.
+Replace `<REPOSITORY-URL>` with the project's clone URL.
 
-## Einrichtung unter Windows (PowerShell)
+## Setup on Windows (PowerShell)
 
-Führe die Befehle im Projektverzeichnis aus:
+Run these commands from the project directory:
 
 ```powershell
 py -3.13 -m venv .venv
@@ -28,7 +28,7 @@ python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Falls PowerShell die Aktivierung wegen der Ausführungsrichtlinie blockiert, verwende `.venv\Scripts\python.exe` anstelle von `python` für die folgenden Python-Befehle, zum Beispiel:
+If PowerShell blocks activation because of the execution policy, use `.venv\Scripts\python.exe` instead of `python` for the following Python commands, for example:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -36,9 +36,9 @@ Falls PowerShell die Aktivierung wegen der Ausführungsrichtlinie blockiert, ver
 .\.venv\Scripts\python.exe manage.py runserver
 ```
 
-## Einrichtung unter Unix (Linux/macOS)
+## Setup on Unix (Linux/macOS)
 
-Führe die Befehle im Projektverzeichnis aus:
+Run these commands from the project directory:
 
 ```bash
 python3.13 -m venv .venv
@@ -48,57 +48,57 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Falls `python3.13` nicht verfügbar ist, verwende eine installierte Python-Version, die mit den in `requirements.txt` festgelegten Django-Abhängigkeiten kompatibel ist.
+If `python3.13` is not available, use an installed Python version that is compatible with the Django dependencies in `requirements.txt`.
 
-## Umgebungsvariablen
+## Environment variables
 
-Öffne die neu erstellte `.env`-Datei. Setze einen eigenen Django-Secret-Key für deine lokale Installation und lasse `DEBUG=True` für die lokale Entwicklung aktiviert. Ein Secret-Key lässt sich nach der Installation der Abhängigkeiten mit folgendem Befehl erzeugen:
+Open the newly created `.env` file. Set a unique Django secret key for your local installation and keep `DEBUG=True` enabled for local development. You can generate a secret key with the following command after installing the dependencies:
 
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Trage die Ausgabe in `.env` ein:
+Add the output to `.env`:
 
 ```dotenv
-SECRET_KEY=<GENERIERTER-SECRET-KEY>
+SECRET_KEY=<GENERATED-SECRET-KEY>
 DEBUG=True
 ```
 
-Die Datei `.env` enthält lokale Konfiguration und Geheimnisse. Teile sie nicht und committe sie nicht ins Repository.
+The `.env` file contains local configuration and secrets. Do not share it or commit it to the repository.
 
-## Datenbank einrichten und Server starten
+## Set up the database and start the server
 
-Die Entwicklungskonfiguration verwendet SQLite. Erzeuge bzw. aktualisiere die Datenbank mit den vorhandenen Migrationen:
+The development configuration uses SQLite. Create or update the database using the existing migrations:
 
 ```bash
 python manage.py migrate
 ```
 
-Optional kannst du einen Admin-Benutzer anlegen:
+You can optionally create an admin user:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Starte den Entwicklungsserver:
+Start the development server:
 
 ```bash
 python manage.py runserver
 ```
 
-Die API läuft anschließend unter <http://127.0.0.1:8000/api/>. Die Django-Admin-Oberfläche ist unter <http://127.0.0.1:8000/admin/> erreichbar.
+The API will then be available at <http://127.0.0.1:8000/api/>. The Django admin interface is available at <http://127.0.0.1:8000/admin/>.
 
-Zum Beenden des Servers drücke `Ctrl+C`. Verlasse die virtuelle Umgebung mit `deactivate`.
+To stop the server, press `Ctrl+C`. Exit the virtual environment with `deactivate`.
 
 ## Tests
 
-Führe die Django-Tests aus dem aktivierten virtuellen Environment und Projektverzeichnis aus:
+Run the Django tests from the activated virtual environment and project directory:
 
 ```bash
 python manage.py test
 ```
 
-## Sicherheitshinweis
+## Security note
 
-`DEBUG=True` ist nur für die lokale Entwicklung gedacht. Für einen öffentlichen oder produktiven Einsatz müssen unter anderem `DEBUG` deaktiviert, ein sicherer Secret-Key gesetzt und `ALLOWED_HOSTS` in `core/settings.py` passend konfiguriert werden. Verwende den Django-Entwicklungsserver nicht als Produktionsserver.
+`DEBUG=True` is intended for local development only. Before using the application publicly or in production, you must at least disable `DEBUG`, set a secure secret key, and configure `ALLOWED_HOSTS` appropriately in `core/settings.py`. Do not use Django's development server as a production server.
