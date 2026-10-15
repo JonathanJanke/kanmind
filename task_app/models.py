@@ -9,8 +9,8 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     status = models.CharField(max_length=50)
     priority = models.CharField(max_length=50)
-    assignee_id = models.IntegerField(null=True, blank=True)
-    reviewer_id = models.IntegerField(null=True, blank=True)
+    assignees = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="assigned_tasks", blank=True)
+    reviewers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="reviewed_tasks", blank=True)
     due_date = models.DateField(null=True)
 
 class Comment(models.Model):

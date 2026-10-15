@@ -11,6 +11,7 @@ class TaskListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """Erstellt einen Task und gibt ihn mit den zugehörigen Benutzerdaten zurück."""
         serializer = TaskSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             task = serializer.save()
@@ -26,9 +27,7 @@ class AssignedToUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        """
-        View for retrieving every task, this User is assigned to
-        """
+        """Gibt alle Tasks zurück, die dem angemeldeten Benutzer zugewiesen sind."""
         tasks = Task.objects.filter(assignee_id=request.user.id)
         serializer = TaskSerializer()
 
@@ -43,9 +42,7 @@ class ReviewingToUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        """
-        View for retrieving every task, this User is assigned to
-        """
+        """Gibt alle Tasks zurück, bei denen der Benutzer als Reviewer eingetragen ist."""
         tasks = Task.objects.filter(reviewer_id=request.user.id)
         serializer = TaskSerializer()
 
@@ -57,6 +54,7 @@ class SingleTaskView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, task_id):
+        """Aktualisiert einen Task teilweise und liefert bei Erfolg den aktualisierten Task."""
         try:
             task = Task.objects.get(pk=task_id)
         except Task.DoesNotExist:
@@ -69,6 +67,7 @@ class SingleTaskView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, task_id):
+        """Löscht den angegebenen Task oder antwortet mit 404, falls er nicht existiert."""
         try:
             task = Task.objects.get(pk=task_id)
         except Task.DoesNotExist:
@@ -81,11 +80,13 @@ class CommentListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, task_id):
+        """Gibt alle Kommentare zurück, die zum angegebenen Task gehören."""
         comments = Comment.objects.filter(task_id=task_id)
         serializer = CommentSerializer(comments, many=True)
         return Response([CommentSerializer.get_response(serializer, comment) for comment in comments], status=status.HTTP_200_OK)
 
     def post(self, request, task_id):
+        """Erstellt einen Kommentar für den Task und setzt den Autor auf den angemeldeten Benutzer."""
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(task_id=task_id, author=request.user)
@@ -93,6 +94,7 @@ class CommentListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, task_id, comment_id):
+        """Löscht einen Kommentar des Tasks oder antwortet mit 404, falls er nicht gefunden wird."""
         try:
             comment = Comment.objects.get(pk=comment_id, task_id=task_id)
         except Comment.DoesNotExist:

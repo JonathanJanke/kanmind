@@ -4,6 +4,7 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, email, password=None, **extra_fields):
+        """Erstellt einen Benutzer mit normalisierter E-Mail und gehashtem Passwort."""
         if not email:
             raise ValueError("Invalid request data.")
 
@@ -14,6 +15,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """Erstellt einen Superuser und prüft dessen Staff- und Adminrechte."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -23,4 +25,3 @@ class UserManager(BaseUserManager):
             raise ValueError("Invalid request data.")
 
         return self.create_user(email, password, **extra_fields)
-

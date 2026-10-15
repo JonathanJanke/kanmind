@@ -6,6 +6,11 @@ from authentication_app.models import User
 from rest_framework import serializers
 
 def validate_board_user(self, data):
+    """Prüft, ob der angegebene Assignee existiert und zum Board gehört.
+
+    Bei partiellen Updates wird das bestehende Board verwendet, wenn kein neues
+    Board in den Eingabedaten enthalten ist.
+    """
     
     board = data.get("board")
     if board is None and self.instance is not None:
@@ -38,10 +43,12 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
+        """Validiert die Task-Daten einschließlich der Board-Zugehörigkeit des Assignees."""
         validate_board_user(self, data)
         return data
         
     def get_response(self, obj):
+        """Erstellt die API-Darstellung eines Tasks samt Assignee und Reviewer."""
 
         assignee = User.objects.filter(pk=obj.assignee_id).first()
         reviewer = User.objects.filter(pk=obj.reviewer_id).first()
@@ -56,7 +63,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "assignee": {"id": assignee.id, "email": assignee.email, "fullname": assignee.fullname} if assignee else None,
             "reviewer": {"id": reviewer.id, "email": reviewer.email, "fullname": reviewer.fullname} if reviewer else None,
             "due_date": obj.due_date,
-            # "comments_count": obj.comments.count(),
+            "comments_count": obj.comments.count(),
         }
 
 class SingleTaskSerializer(serializers.ModelSerializer):
@@ -65,10 +72,12 @@ class SingleTaskSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data): 
+        """Validiert die Task-Daten einschließlich der Board-Zugehörigkeit des Assignees."""
         validate_board_user(self, data)
         return data
 
     def get_response(self, obj):
+        """Erstellt die API-Darstellung eines einzelnen Tasks samt Benutzerdetails."""
             
         assignee = User.objects.filter(pk=obj.assignee_id).first()
         reviewer = User.objects.filter(pk=obj.reviewer_id).first()
@@ -91,6 +100,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ["content"]
 
     def validate(self, data):
+        """Stellt sicher, dass der Kommentartext nicht leer ist."""
         if not data.get("content"):
             raise serializers.ValidationError({
                 "content": "Content is required."
@@ -98,6 +108,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return data
 
     def get_response(self, obj):
+        """Erstellt die API-Darstellung eines Kommentars einschließlich Autor und Erstellungszeit."""
         return {
             "id": obj.id,
             "created_at": obj.created_at,

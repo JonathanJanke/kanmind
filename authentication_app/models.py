@@ -15,4 +15,5 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ["fullname"]
 
     def __str__(self):
+        """Gibt den vollständigen Namen für lesbare Benutzer-Darstellungen zurück."""
         return self.fullname

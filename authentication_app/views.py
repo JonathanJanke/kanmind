@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
+        """Registriert einen Benutzer und gibt dessen Profildaten samt Auth-Token zurück."""
         serializer = UserRegisterSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"error": "Invalid request data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -40,6 +41,7 @@ class UserLoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        """Authentifiziert einen Benutzer und gibt bei Erfolg dessen Auth-Token zurück."""
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -60,6 +62,7 @@ class UserLoginView(APIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def email_check(request, email):
+    """Sucht einen Benutzer per E-Mail und gibt dessen öffentliche Profildaten zurück."""
     user = User.objects.filter(email=email).first()
     if user:
         return Response(

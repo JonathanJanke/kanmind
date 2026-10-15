@@ -3,6 +3,7 @@ from django.db import migrations
 
 
 def hash_legacy_passwords(apps, schema_editor):
+    """Hasht unverschlüsselte Alt-Passwörter im Rahmen der Datenbankmigration."""
     User = apps.get_model("authentication_app", "User")
     database = schema_editor.connection.alias
 
