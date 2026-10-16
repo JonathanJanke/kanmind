@@ -48,8 +48,6 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-If `python3.13` is not available, use an installed Python version that is compatible with the Django dependencies in `requirements.txt`.
-
 ## Environment variables
 
 Open the newly created `.env` file. Set a unique Django secret key for your local installation and keep `DEBUG=True` enabled for local development. You can generate a secret key with the following command after installing the dependencies:
