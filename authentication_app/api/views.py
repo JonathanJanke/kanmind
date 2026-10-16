@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import validate_email
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 
-from .models import User
+from ..models import User
 from .serializers import LoginSerializer, UserRegisterSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
@@ -61,8 +63,17 @@ class UserLoginView(APIView):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def email_check(request, email):
-    """Sucht einen Benutzer per E-Mail und gibt dessen öffentliche Profildaten zurück."""
+def email_check(request):
+    """Sucht einen Benutzer per E-Mail (Query-Parameter) und gibt dessen öffentliche Profildaten zurück."""
+    email = request.query_params.get("email")
+    if not email:
+        return Response({"error": "Email query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        validate_email(email)
+    except DjangoValidationError:
+        return Response({"error": "Invalid email."}, status=status.HTTP_400_BAD_REQUEST)
+
     user = User.objects.filter(email=email).first()
     if user:
         return Response(

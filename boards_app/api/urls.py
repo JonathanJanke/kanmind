@@ -1,5 +1,5 @@
 from django.urls import path
-from boards_app.views import BoardListView, BoardDetailView
+from boards_app.api.views import BoardListView, BoardDetailView
 
 urlpatterns = [
     path('boards/', BoardListView.as_view(), name='board-list'),

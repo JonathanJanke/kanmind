@@ -5,12 +5,13 @@ from boards_app.models import Board
 # Create your models here.
 class Task(models.Model):
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name="tasks")
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="created_tasks")
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=50)
     priority = models.CharField(max_length=50)
-    assignees = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="assigned_tasks", blank=True)
-    reviewers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="reviewed_tasks", blank=True)
+    assignee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="assigned_tasks")
+    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="reviewed_tasks")
     due_date = models.DateField(null=True)
 
 class Comment(models.Model):
@@ -18,3 +19,6 @@ class Comment(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]

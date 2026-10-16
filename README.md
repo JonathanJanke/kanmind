@@ -41,7 +41,7 @@ If PowerShell blocks activation because of the execution policy, use `.venv\Scri
 Run these commands from the project directory:
 
 ```bash
-python3.13 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
@@ -90,14 +90,6 @@ python manage.py runserver
 The API will then be available at <http://127.0.0.1:8000/api/>. The Django admin interface is available at <http://127.0.0.1:8000/admin/>.
 
 To stop the server, press `Ctrl+C`. Exit the virtual environment with `deactivate`.
-
-## Tests
-
-Run the Django tests from the activated virtual environment and project directory:
-
-```bash
-python manage.py test
-```
 
 ## Security note
 

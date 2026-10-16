@@ -1,12 +1,13 @@
 from django.contrib.auth import authenticate
 from django.db.models.aggregates import Count
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Board
+from ..models import Board
 from .serializers import BoardSerializer
+from task_app.models import Task
 
 def boards_with_counts():
     """Liefert Boards mit in der Datenbank berechneter Mitgliederanzahl.
@@ -53,6 +54,15 @@ def boards_with_counts():
         ),
     )
 
+def board_detail_queryset():
+    return boards_with_counts().prefetch_related(
+        "members",
+        Prefetch(
+            "tasks",
+            queryset=Task.objects.select_related("assignee", "reviewer")
+            .annotate(comments_count=Count("comments", distinct=True)),
+        ),
+    )
 
 class BoardListView(APIView):
     """
@@ -89,7 +99,7 @@ class BoardDetailView(APIView):
     def get(self, request, board_id):
         """Gibt ein Board zurück, sofern der Benutzer Owner oder Mitglied ist."""
         try:
-            board = boards_with_counts().get(pk=board_id)
+            board = board_detail_queryset().get(pk=board_id)
         except Board.DoesNotExist:
             return Response({"error": "Board not found"}, status=404)
 
@@ -105,13 +115,14 @@ class BoardDetailView(APIView):
         except Board.DoesNotExist:
             return Response({"error": "Board not found"}, status=404)
 
-        if board.owner_id != request.user.id:
+        is_member = board.members.filter(pk=request.user.id).exists()
+        if not (board.owner_id == request.user.id or is_member):
             return Response({"error": "You do not have permission to update this board"}, status=403)
 
         serializer = BoardSerializer(board, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.get_update_response())
 
     def delete(self, request, board_id):
         """Löscht ein Board, sofern der angemeldete Benutzer dessen Owner ist."""
@@ -124,4 +135,4 @@ class BoardDetailView(APIView):
             return Response({"error": "You do not have permission to delete this board"}, status=403)
 
         board.delete()
-        return Response({"success": "Board deleted"}, status=204)
+        return Response(status=204)
